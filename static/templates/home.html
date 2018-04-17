@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block home %}
+ <!-- Main jumbotron for a primary marketing message or call to action -->
+      <div class="jumbotron">
+        <div class="container">
+          <h1 class="display-3">Hello, world!</h1>
+          <p>This is a template for a simple marketing or informational website. It includes a large callout called a jumbotron and three supporting pieces of content. Use it as a starting point to create something more unique.</p>
+          <p><a class="btn btn-danger btn-lg" href="#" role="button">Learn more &raquo;</a></p>
+        </div>
+      </div>
+
+      <div class="container">
+        {% if messages %}
+        <div class='row'>
+            <div class='col-sm-6 col-sm-offset-3'>
+                    {% for msg in messages %}
+                    <p {% if msg.tags %} class="alert alert-success"{% endif %}>{{ msg }}</p>
+                    {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        <!-- Example row of columns -->
+        <div class="row">
+          <div class="col-lg-4">
+            <h2>Heading</h2>
+            <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+            <p><a class="btn btn-secondary" href="#" role="button">View details &raquo;</a></p>
+          </div>
+          <div class="col-lg-4">
+            <h2>Heading</h2>
+            <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+            <p><a class="btn btn-secondary" href="#" role="button">View details &raquo;</a></p>
+          </div>
+          <div class="col-lg-4">
+            <form method='POST' action=''> {% csrf_token %}
+                {{form.as_p}}
+                <input type='submit' class='btn btn-success btn-block'>
+            </form>
+          </div>
+        </div>
+
+        <hr>
+
+      </div> <!-- /container -->
+{% endblock %}

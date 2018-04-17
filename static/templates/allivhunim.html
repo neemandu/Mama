@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block all_ivhunim %}
+ 
+<div class="container" align="right">
+<h1>האבחונים שלי</h1>
+<a href='{% url "newpatient" %}' class="btn">הוסף אבחון חדש</a>
+<table  id="table_id"
+		data-toggle="table"
+		data-search="true"
+		data-toolbar="#toolbar"
+        class="table-responsive display">
+	<thead>
+		<tr>
+			<th data-field="examen" data-filter-control="select" data-sortable="true">פעולות</th>
+			<th data-field="date" data-filter-control="select" data-sortable="true">תאריך האבחון</th>
+			<th data-field="examen" data-filter-control="select" data-sortable="true"> סוג האבחון (פרטי/צד שלישי)</th>
+			<th data-field="examen" data-filter-control="select" data-sortable="true">מוסד חינוכי</th>
+			<th data-field="examen" data-filter-control="select" data-sortable="true">כיתה</th>
+			<th data-field="examen" data-filter-control="select" data-sortable="true">שם</th>
+		</tr>
+	</thead>
+	<tbody>
+        {% for ivhun in ivhunim %}
+		<tr>
+			<td><a href='{% url "newpatient" %}'>עריכה</a></td>
+			<td>{{ivhun.timestamp}}</td>
+			<td>{{ivhun.ivhun_type}}</td>
+			<td>{{ivhun.educational_instatute}}</td>
+			<td>{{ivhun.grade}}</td>			
+			<td>{{ivhun.full_name}}</td>
+		</tr>
+        {% endfor %}
+	</tbody>
+</table>
+</div>
+{% endblock %}
