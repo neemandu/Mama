@@ -58,5 +58,6 @@ class PatientForm(forms.ModelForm):
             "five_nine_two": "592",
             "conclusion": "סיכום",
             "hamlatzot": "המלצות",
+            "owner": "הורה המאובחן",
         }
         

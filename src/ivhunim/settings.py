@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'south',
     'signups',
     'crispy_forms',
 )
@@ -99,3 +100,5 @@ if DEBUG:
     STATICFILES_DIRS = (
         os.path.join(os.path.dirname(BASE_DIR), "static", "static"),
     )
+
+LOGIN_REDIRECT_URL = '/'

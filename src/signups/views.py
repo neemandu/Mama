@@ -2,10 +2,9 @@
 from django.shortcuts import render, render_to_response, RequestContext, HttpResponseRedirect
 from django.contrib import messages
 from .models import SighUp, Patient
-# Create your views here.
-
 from .forms import SignUpForm, PatientForm
 
+ 
 def home(request):
     
     form = SignUpForm(request.POST or None)
@@ -24,13 +23,15 @@ def thankyou(request):
     return render_to_response("thankyou.html",
                               locals(),
                               context_instance=RequestContext(request))
-
 def allivhunim(request):
-    ivhunim = Patient.objects.all()
+    
+    if request.user.is_superuser:
+        ivhunim = Patient.objects.all().order_by('timestamp')
+    else:
+        ivhunim = Patient.objects.filter(owner=request.user).order_by('timestamp')
     return render_to_response("allivhunim.html",
                               { 'ivhunim' : ivhunim },
                               context_instance=RequestContext(request))
-
 def newpatient(request):
     print "newpatient"
     pForm = PatientForm(request.POST or None)

@@ -14,7 +14,9 @@ urlpatterns = patterns('',
     url(r'^allivhunim', 'signups.views.allivhunim', name='allivhunim'),
     url(r'^newpatient', 'signups.views.newpatient', name='newpatient'),
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^accounts/', include('django.contrib.auth.urls')),
 )
+
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL,
