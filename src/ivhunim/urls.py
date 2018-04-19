@@ -12,7 +12,7 @@ urlpatterns = patterns('',
     url(r'^thank-you', 'signups.views.thankyou', name='thankyou'),
     url(r'^home', 'signups.views.home', name='home'),
     url(r'^allivhunim', 'signups.views.allivhunim', name='allivhunim'),
-    url(r'^newpatient', 'signups.views.newpatient', name='newpatient'),
+    url(r'^newpatient/(?P<ivhun_id>[0-9]+)/$', 'signups.views.newpatient', name='newpatient'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^accounts/', include('django.contrib.auth.urls')),
 )

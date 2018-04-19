@@ -32,18 +32,24 @@ def allivhunim(request):
     return render_to_response("allivhunim.html",
                               { 'ivhunim' : ivhunim },
                               context_instance=RequestContext(request))
-def newpatient(request):
-    print "newpatient"
-    pForm = PatientForm(request.POST or None)
+def newpatient(request, ivhun_id):
+    if ivhun_id == -1:
+        pForm = PatientForm(request.POST or None)
+    else:
+        try:
+            ivhun = Patient.objects.get(id=ivhun_id, owner=request.user)
+            pForm = PatientForm(request.POST or None, instance=ivhun)
+        except Patient.DoesNotExist:
+            return render_to_response('401.html',
+                                        locals(),
+                                        context_instance=RequestContext(request))
+       
     
     if pForm.is_valid():
         save_it = pForm.save(commit=False)
         save_it.save()
-        messages.success(request, 'נוסף אבחון חדש')
-        print "newpatient success!!!"
-        return HttpResponseRedirect('/thank-you/')
+        return HttpResponseRedirect('/allivhunim/')
 
-    print "newpatient FAIL!!!"
     return render_to_response("newpatient.html",
                               locals(),
                               context_instance=RequestContext(request))
