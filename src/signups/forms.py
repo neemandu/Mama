@@ -19,6 +19,7 @@ class PatientForm(forms.ModelForm):
             "address":"כתובת",
             "father_phone":"טלפון האב",
             "mother_phone":"טלפון האם",
+            "parent_email":"אימייל של ההורה",
             "grade":"כיתה",
             "educational_instatute":"מוסד חינוכי",
             "relevant_background":"רקע רלוונטי",

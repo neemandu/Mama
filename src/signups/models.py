@@ -21,6 +21,7 @@ class Patient(models.Model):
     address = models.CharField(max_length=200)
     father_phone = models.CharField(max_length=10)
     mother_phone = models.CharField(max_length=10)
+    parent_email = models.EmailField(max_length=254)
     grade = models.CharField(max_length=2)
     educational_instatute = models.CharField(max_length=100)
     relevant_background = models.TextField()

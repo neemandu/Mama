@@ -26,6 +26,12 @@ TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'neemandu@gmail.com'
+EMAIL_HOST_PASSWORD = '5052n33man@@'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
 import crispy_forms
 
 # Application definition
