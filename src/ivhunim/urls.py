@@ -1,4 +1,5 @@
 from django.conf.urls import patterns, include, url
+from wkhtmltopdf.views import PDFTemplateView
 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -15,6 +16,7 @@ urlpatterns = patterns('',
     url(r'^upsertivhun/(?P<ivhun_id>[0-9]+)/$', 'signups.views.upsertivhun', name='upsertivhun'),
     url(r'^copyivhun/(?P<ivhun_id>[0-9]+)/$', 'signups.views.copyivhun', name='copyivhun'),
     url(r'^confirmdelete/(?P<ivhun_id>[0-9]+)/$', 'signups.views.confirmdelete', name='confirmdelete'),
+    url(r'^downloadivhun/(?P<ivhun_id>[0-9]+)/$', 'signups.views.downloadivhun', name='downloadivhun'),
     url(r'^deleteivhun/(?P<ivhun_id>[0-9]+)/$', 'signups.views.deleteivhun', name='deleteivhun'),
     url(r'^emailivhun/(?P<ivhun_id>[0-9]+)/$', 'signups.views.emailivhun', name='emailivhun'),
     url(r'^admin/', include(admin.site.urls)),

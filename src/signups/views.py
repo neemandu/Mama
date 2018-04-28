@@ -1,13 +1,150 @@
 # -*- coding: utf-8 -*-
-from django.shortcuts import render, render_to_response, RequestContext, HttpResponseRedirect
+from django.shortcuts import render, render_to_response, RequestContext, HttpResponseRedirect, HttpResponse
 from django.contrib import messages
 from .models import SighUp, Patient
 from .forms import SignUpForm, PatientForm
 from django.core.mail import send_mail
 from django.conf import settings
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfbase.pdfmetrics import registerFontFamily,registerFont
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.units import inch
+from reportlab.platypus import Paragraph
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.pdfgen.canvas import Canvas
+from reportlab.lib.enums import TA_RIGHT, TA_CENTER, TA_LEFT
+
+def downloadivhun(request, ivhun_id):       
+    if request.user.is_superuser:
+        ivhun = Patient.objects.get(id=ivhun_id)
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename='+ ivhun.patient_id + '".pdf"'
+        registerFont(TTFont("Times_New_Roman", "Times_New_Roman.ttf"))
+        canv = Canvas(response, pagesize = A4)
+
+        canv.setFont("Times_New_Roman", 15)
+        #date
+        canv.drawString(30,750,ivhun.timestamp.strftime("%d/%m/%Y"))
+        #subject
+        canv.setFont("Times_New_Roman", 24)
+        canv.drawString(150,710,"יטקדיד ןוחבא ךמס לע תעד תווח")
+        canv.line(145,705,410,705)
+        
+        canv.setFont("Times_New_Roman", 12)
+        canv.drawRightString(500,650,":קדבנה םש")
+        canv.drawRightString(430,650, ivhun.full_name[::-1])
+        canv.drawRightString(500,630,":תוהז תדועת")
+        canv.drawRightString(430,630, ivhun.patient_id[::-1])
+        canv.drawRightString(500,610,":הדיל ךיראת")
+        canv.drawRightString(430,610, ivhun.date_of_birth.strftime("%d/%m/%Y"))
+        canv.drawRightString(500,590,":תבותכ")
+        canv.drawRightString(430,590, ivhun.address[::-1])
+        canv.drawRightString(500,570,":התיכ")
+        canv.drawRightString(430,570, ivhun.grade[::-1])
+        canv.drawRightString(500,550,":ידומיל דסומ")
+        canv.drawRightString(430,550, ivhun.educational_instatute[::-1])
+
+        canv.drawRightString(500,520,":יטנוולר עקר")
+        canv.line(450,517,500,517)
+        
+        styleSheet = getSampleStyleSheet()
+        style = ParagraphStyle(name='Normal',
+                                  fontName='Times_New_Roman',
+                                  fontSize=12,
+                                  leading=12,
+                                  alignment=TA_RIGHT)
+        reversed = ivhun.relevant_background[::-1].replace("\n", "<br />")
+        
+        rev= reverseParagraph(reversed)
+        P=Paragraph(rev ,style)
+        
+        aW = 500    # available width and height
+        aH = 515
+        
+        w,h = P.wrap(aW, aH)    # find required space
+        if w<=aW and h<=aH:
+            aH = aH - h         # reduce the available height
+            P.drawOn(canv,0,aH)           
+        else:
+            raise ValueError, "Not enough room"
+        
+        height = aH - 20
+        canv.drawRightString(500,height,":תיללכ תומשרתה")
+        canv.line(430,height - 3,500,height - 3)
+        
+        reversed = ivhun.overall[::-1].replace("\n", "<br />")
+        
+        rev= reverseParagraph(reversed)
+        P=Paragraph(rev ,style)
+        aH = aH - 25
+        w,h = P.wrap(aW, aH)    # find required space
+        if w<=aW and h<=aH:
+            aH = aH - h         # reduce the available height
+            P.drawOn(canv,0,aH)           
+        else:
+            raise ValueError, "Not enough room"
+        
+        height = aH - 20
+        canv.drawRightString(500,height,":הבישח ירושיכ")
+        canv.line(430,height - 3,500,height - 3)
+        
+        reversed = ivhun.thinking_skills[::-1].replace("\n", "<br />")
+        
+        rev= reverseParagraph(reversed)
+        P=Paragraph(rev ,style)
+        aH = aH - 25
+        w,h = P.wrap(aW, aH)    # find required space
+        if w<=aW and h<=aH:
+            aH = aH - h         # reduce the available height
+            P.drawOn(canv,0,aH)           
+        else:
+            raise ValueError, "Not enough room"
+        
+        height = aH - 20
+        canv.drawRightString(500,height,":תילולימ הבישח")
+        canv.line(430,height - 3,500,height - 3)
+        
+        reversed = ivhun.yeda_ortography_general[::-1].replace("\n", "<br />")
+        
+        rev= reverseParagraph(reversed)
+        P=Paragraph(rev ,style)
+        aH = aH - 25
+        w,h = P.wrap(aW, aH)    # find required space
+        if w<=aW and h<=aH:
+            aH = aH - h         # reduce the available height
+            P.drawOn(canv,0,aH)           
+            canv.save()
+        else:
+            raise ValueError, "Not enough room"
+        
+        return response
+    return render_to_response('401.html',
+                                            locals(),
+                                            context_instance=RequestContext(request))
 
 
- 
+def reverseParagraph(p):
+    newWord = 6
+    partWord = ""
+    completeWord = ""
+    for i in range(0, len(p)):        
+        if newWord  < 6:
+            newWord = newWord + 1
+            continue
+        c = p[i]
+        if i == (len(p) - 1):
+            partWord += c
+            completeWord = partWord + "<br />" + completeWord
+        if c != '<':
+           partWord += c
+        elif i + 5 < len(p) and p[i : (i + 6)] == "<br />":
+            completeWord = partWord + "<br />" + completeWord
+            partWord = ""
+            newWord  = 0
+        
+    return completeWord
+
 def home(request):
     
     form = SignUpForm(request.POST or None)
@@ -35,6 +172,8 @@ def allivhunim(request):
     return render_to_response("allivhunim.html",
                               { 'ivhunim' : ivhunim },
                               context_instance=RequestContext(request))
+
+
 
 
 def upsertivhun(request, ivhun_id):
@@ -105,7 +244,7 @@ def emailivhun(request, ivhun_id):
                                     locals(),
                                     context_instance=RequestContext(request))
     subject =  u'אבחון - ' + ivhun.full_name 
-    msg = 'Here is the message.'
+    msg = 'מוכן,'+ ivhun.full_name +'היי, האבחון של '
     from_email = settings.EMAIL_HOST_USER
     to = [settings.EMAIL_HOST_USER]
     send_mail(subject,
