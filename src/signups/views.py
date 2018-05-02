@@ -10,10 +10,15 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase.pdfmetrics import registerFontFamily,registerFont
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.units import inch
-from reportlab.platypus import Paragraph
+from reportlab.platypus import Paragraph, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.enums import TA_RIGHT, TA_CENTER, TA_LEFT
+from django.contrib.auth.models import User
+from smtplib import SMTPException
+from reportlab.lib import colors
+
+
 
 def downloadivhun(request, ivhun_id):       
     if request.user.is_superuser:
@@ -114,10 +119,29 @@ def downloadivhun(request, ivhun_id):
         if w<=aW and h<=aH:
             aH = aH - h         # reduce the available height
             P.drawOn(canv,0,aH)           
-            canv.save()
         else:
             raise ValueError, "Not enough room"
         
+        height = aH - 20
+        canv.drawRightString(500,height,":טבלה")
+        canv.line(430,height - 3,500,height - 3)
+        data=[(1,2),(3,4)]
+        table = Table(data, colWidths=200 , rowHeights=30)
+        table.setStyle(TableStyle([
+                       ('ALIGN',(0,0),(-1,-1),'CENTER'),
+                       ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
+                       ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+                       ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+                       ]))
+        aH = aH - 30
+        w,h = table.wrap(aW, aH)    # find required space
+        if w<=aW and h<=aH:
+            aH = aH - h         # reduce the available height
+            table.drawOn(canv,80,aH)           
+            
+        else:
+            raise ValueError, "Not enough room"
+        canv.save()
         return response
     return render_to_response('401.html',
                                             locals(),
@@ -233,26 +257,33 @@ def deleteivhun(request, ivhun_id):
     
     
 def emailivhun(request, ivhun_id):
-    try:
-        if request.user.is_superuser:
-            ivhun = Patient.objects.get(id=ivhun_id)
-        else:
-            ivhun = Patient.objects.get(id=ivhun_id, owner=request.user)
-        
-    except Patient.DoesNotExist:
+    if request.user.is_superuser:
+        ivhun = Patient.objects.get(id=ivhun_id)
+        user = User.objects.get(id=ivhun.owner.id)
+    else:
         return render_to_response('401.html',
-                                    locals(),
-                                    context_instance=RequestContext(request))
-    subject =  u'אבחון - ' + ivhun.full_name 
-    msg = 'מוכן,'+ ivhun.full_name +'היי, האבחון של '
+                                locals(),
+                                context_instance=RequestContext(request))
+    subject =  u'אבחון - ' + ivhun.full_name
+    msg = U"שלום,\n\n"
+    msg += U'האבחון של ' + ivhun.full_name + U' מוכן,' + "\n"
+    msg += U"לצפייה באבחון, ניתן להיכנס ל- www.ayaneeman.co.il" + "\n"
+    msg += U"תחת \"האבחונים שלי\":" + "\n\n"
+    msg += U"שם משתמש: " + user.username + "\n"
+    msg += U"שם סיסמא: " + user.username + "\n\n"
+    msg += U"אני זמינה לכל שאלה!\n\n"
+    msg += U"איה."
     from_email = settings.EMAIL_HOST_USER
     to = [settings.EMAIL_HOST_USER]
-    send_mail(subject,
-              msg,
-              from_email,
-              to,
-              fail_silently=False)
-    
+    try:
+        send_mail(subject,
+                  msg,
+                  from_email,
+                  to,
+                  fail_silently=False)
+        messages.success(request, '!קישור לאבחון נשלח בהצלחה')
+    except SMTPException:
+        messages.error(request, 'השליחה נכשלה')
     return HttpResponseRedirect('/allivhunim/')
 
 
