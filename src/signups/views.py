@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import render, render_to_response, RequestContext, HttpResponseRedirect, HttpResponse
+from django.core.files.storage import FileSystemStorage
 from django.contrib import messages
 from .models import SighUp, Patient
 from .forms import SignUpForm, PatientForm
@@ -10,22 +11,43 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase.pdfmetrics import registerFontFamily,registerFont
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.units import inch
-from reportlab.platypus import Paragraph, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.enums import TA_RIGHT, TA_CENTER, TA_LEFT
 from django.contrib.auth.models import User
 from smtplib import SMTPException
-from reportlab.lib import colors
+from reportlab.lib import colors  
 
 
+def downloadivhun(request, ivhun_id):
+    doc = SimpleDocTemplate("somefilename.pdf")
+    styles = getSampleStyleSheet()
+    Story = [Spacer(1,2*inch)]
+    style = styles["Normal"]
+    for i in range(100):
+       bogustext = ("This is Paragraph number %s.  " % i) * 20
+       p = Paragraph(bogustext, style)
+       Story.append(p)
+       Story.append(Spacer(1,0.2*inch))
+    doc.build(Story)
 
-def downloadivhun(request, ivhun_id):       
+    fs = FileSystemStorage("/tmp")
+    with fs.open("somefilename.pdf") as pdf:
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="somefilename.pdf"'
+        return response
+
+    return response
+"""
     if request.user.is_superuser:
         ivhun = Patient.objects.get(id=ivhun_id)
+        
         response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename='+ ivhun.patient_id + '".pdf"'
+        file_name = ivhun.patient_id + '".pdf"'
+        response['Content-Disposition'] = 'attachment; filename='+ file_name
         registerFont(TTFont("Times_New_Roman", "Times_New_Roman.ttf"))
+        
         canv = Canvas(response, pagesize = A4)
 
         canv.setFont("Times_New_Roman", 15)
@@ -142,11 +164,13 @@ def downloadivhun(request, ivhun_id):
         else:
             raise ValueError, "Not enough room"
         canv.save()
+        
         return response
+        
     return render_to_response('401.html',
                                             locals(),
                                             context_instance=RequestContext(request))
-
+"""
 
 def reverseParagraph(p):
     newWord = 6
